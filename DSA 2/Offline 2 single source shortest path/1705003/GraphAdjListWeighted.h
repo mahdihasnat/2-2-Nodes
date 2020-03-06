@@ -197,7 +197,7 @@ void Graph::dijkstra(int source)
             int v = adjList[u].getItem(i).first;
             if (color[v] != WHITE)
                 continue;
-            int w = adjList[u].getItem(i).second;
+            int w = abs(adjList[u].getItem(i).second);
             if (dist[v] > dist[u] + w)
             {
                 dist[v] = dist[u] + w;

@@ -1,6 +1,5 @@
-#ifndef ADDED_GRAPHADJLIST
-#define ADDED_GRAPHADJLIST 1
-#include "myarraylist.h"
+#ifndef ADDED_GRAPHADJMATRIX
+#define ADDED_GRAPHADJMATRIX 1
 #include <queue>
 #include <iostream>
 #define NULL_VALUE -1
@@ -9,7 +8,7 @@
 #define GRAY 2
 #define BLACK 3
 
-#define DBG(x) cout<<(#x)<<" --> "<<(x)<<endl;
+#define DBG(x) cout << (#x) << " --> " << (x) << endl;
 
 using namespace std;
 
@@ -24,7 +23,7 @@ class Graph
 {
     int nVertices, nEdges;
     const bool directed = 1;
-    ArrayList<pair<int, int>> *adjList;
+    int **adjMatrix;
     int *color, *parent, *dist;
     void dfs_visit(int source); //will run dfs in the graph
     void initializeSingleSource(int source);
@@ -42,7 +41,7 @@ public:
     void dfs(int source);         //will run dfs in the graph
     void dijkstra(int source);    //will run dijkstra in the graph
     bool bellmenford(int source); //will run bellmenford in the graph
-    void printPath(int source,int dest) ;
+    void printPath(int source, int dest);
     int getDist(int u);
 };
 
@@ -50,7 +49,7 @@ Graph::Graph()
 {
     nVertices = 0;
     nEdges = 0;
-    adjList = 0;
+    adjMatrix = 0;
     color = 0;
     parent = 0;
     dist = 0;
@@ -63,10 +62,12 @@ int Graph::getDist(int u)
 
 void Graph::setnVertices(int n)
 {
-    this->nVertices = n;
-    this->nEdges = 0;
-    if (adjList != 0)
-        delete[] adjList; //delete previous list
+    if (adjMatrix)
+    {
+        for (int i = 0; i < this->nVertices; i++)
+            delete[] adjMatrix[i];
+        delete[] adjMatrix;
+    }
     if (color != 0)
         delete[] color; //delete previous color
     if (parent != 0)
@@ -74,7 +75,16 @@ void Graph::setnVertices(int n)
     if (dist != 0)
         delete[] dist; //delete previous parent
 
-    adjList = new ArrayList<pair<int, int>>[nVertices];
+    this->nVertices = n;
+    this->nEdges = 0;
+
+    adjMatrix = new int *[n];
+    for (int i = 0; i < n; i++)
+    {
+        adjMatrix[i] = new int[n];
+        for (int j = 0; j < n; j++)
+            adjMatrix[i][j] = 0;
+    }
 
     color = new int[n];
     parent = new int[n];
@@ -86,9 +96,9 @@ bool Graph::addEdge(int u, int v, int w)
     if (u < 0 || v < 0 || u >= nVertices || v >= nVertices)
         return 0; //vertex out of range
     this->nEdges++;
-    adjList[u].insertItem(make_pair(v, w));
+    adjMatrix[u][v] = w;
     if (!directed)
-        adjList[v].insertItem(make_pair(u, w));
+        adjMatrix[v][u] = w;
     return 1;
 }
 
@@ -97,8 +107,9 @@ void Graph::printAdjVertices(int u)
     if (u < 0 || u >= nVertices)
         return;
     cout << "Adjacent vertices of " << u << " : ";
-    for (int i = 0; i < adjList[u].getLength(); i++)
-        cout << adjList[u].getItem(i) << " ";
+    for (int i = 0; i < nVertices; i++)
+        if (adjMatrix[u][i])
+            cout << make_pair(i, adjMatrix[u][i]) << " ";
     cout << "\n";
     //prints all adjacent vertices of a vertex u
 }
@@ -108,20 +119,22 @@ int Graph::getDist(int u, int v)
     if (u < 0 || u >= nVertices || v < 0 || v >= nVertices)
         return INFINITY;
     //returns the shortest path distance from u to v
-    dijkstra(u);
+    bellmenford(u);
     return dist[v];
 }
 void Graph::dfs_visit(int u)
 {
     color[u] = GRAY;
     cout << u << " ";
-    for (int i = 0; i < adjList[u].getLength(); i++)
+    for (int v = 0; v < nVertices; v++)
     {
-        int v = adjList[u].getItem(i).first;
-        if (color[v] == WHITE)
+        if (adjMatrix[u][v])
         {
-            parent[v] = u;
-            dfs_visit(v);
+            if (color[v] == WHITE)
+            {
+                parent[v] = u;
+                dfs_visit(v);
+            }
         }
     }
     color[u] = BLACK;
@@ -143,9 +156,10 @@ void Graph::printGraph()
     for (int i = 0; i < nVertices; i++)
     {
         cout << i << ":";
-        for (int j = 0; j < adjList[i].getLength(); j++)
+        for (int j = 0; j < nVertices; j++)
         {
-            cout << " " << adjList[i].getItem(j);
+            if (adjMatrix[i][j])
+                cout << " " << make_pair(j, adjMatrix[i][j]);
         }
         cout << endl;
     }
@@ -179,7 +193,8 @@ void Graph::dijkstra(int source)
         int u = pq.top().second;
         pq.pop();
 
-        if(color[u] !=WHITE) continue;
+        if (color[u] != WHITE)
+            continue;
 
         // DBG(u);
         // DBG(color[u]);
@@ -192,12 +207,14 @@ void Graph::dijkstra(int source)
         // cout<<endl;
 
         color[u] = GRAY;
-        for (int i = 0; i < adjList[u].getLength(); i++)
+        for (int v = 0; v < nVertices; v++)
         {
-            int v = adjList[u].getItem(i).first;
+
             if (color[v] != WHITE)
                 continue;
-            int w = abs(adjList[u].getItem(i).second);
+            int w = abs(adjMatrix[u][v]);
+            if (w == 0)
+                continue;
             if (dist[v] > dist[u] + w)
             {
                 dist[v] = dist[u] + w;
@@ -218,10 +235,11 @@ bool Graph::bellmenford(int source)
     {
         for (int u = 0; u < nVertices; u++)
         {
-            for (int j = 0; j < adjList[u].getLength(); j++)
+            for (int v = 0; v < nVertices; v++)
             {
-                int v = adjList[u].getItem(j).first;
-                int w = adjList[u].getItem(j).second;
+                int w = adjMatrix[u][v];
+                if (w == 0)
+                    continue;
                 if (dist[v] > dist[u] + w)
                     dist[v] = dist[u] + w, parent[v] = u;
             }
@@ -229,10 +247,11 @@ bool Graph::bellmenford(int source)
     }
     for (int u = 0; u < nVertices; u++)
     {
-        for (int j = 0; j < adjList[u].getLength(); j++)
+        for (int v = 0; v < nVertices; v++)
         {
-            int v = adjList[u].getItem(j).first;
-            int w = adjList[u].getItem(j).second;
+            int w = adjMatrix[u][v];
+            if (w == 0)
+                continue;
             if (dist[v] > dist[u] + w)
             {
                 return 0;
@@ -242,35 +261,39 @@ bool Graph::bellmenford(int source)
     return 1;
 }
 
- void Graph::printPath(int source,int dest)
- {
-     if(source == dest ) 
-     {
-         cout<<source<<" ";
-         return ;
-     }
-     else if(parent[dest]==NULL_VALUE)
-     {
-        cout<<"No Path Found\n";
-     }
-     else 
-     {
-         printPath(source , parent[dest]);
-         cout<<"-> "<<dest;
-     }
- }
+void Graph::printPath(int source, int dest)
+{
+    if (source == dest)
+    {
+        cout << source << " ";
+        return;
+    }
+    else if (parent[dest] == NULL_VALUE)
+    {
+        cout << "No Path Found\n";
+    }
+    else
+    {
+        printPath(source, parent[dest]);
+        cout << "-> " << dest;
+    }
+}
 
 Graph::~Graph()
 {
-    nVertices = nEdges = 0;
     if (color)
         delete[] color;
     if (dist)
         delete[] dist;
     if (parent)
         delete[] parent;
-    if (adjList)
-        delete[] adjList;
+    if (adjMatrix)
+    {
+        for (int i = 0; i < nVertices; i++)
+            delete[] adjMatrix[i];
+        delete[] adjMatrix;
+    }
+    nVertices = nEdges = 0;
 }
 
 #endif
