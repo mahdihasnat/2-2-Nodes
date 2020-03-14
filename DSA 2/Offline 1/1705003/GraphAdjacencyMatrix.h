@@ -51,6 +51,7 @@ Graph::Graph(bool dir)
     color= 0;
     parent= 0;
     dist= 0;
+    
 }
 
 void Graph::setnVertices(int n)

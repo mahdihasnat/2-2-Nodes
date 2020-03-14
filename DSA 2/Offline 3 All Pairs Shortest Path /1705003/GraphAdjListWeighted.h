@@ -484,8 +484,11 @@ bool Graph::bellmenford(int source)
 
 Graph::~Graph()
 {
-    if (adjList != 0)
+    if (adjList != 0) {
+        for(int i=0;i<nVertices;i++)
+            adjList[i].clear();
         delete[] adjList; //delete previous list
+    }
     if (color != 0)
         delete[] color; //delete previous color
     if (parent != 0)
