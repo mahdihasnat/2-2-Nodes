@@ -1,0 +1,47 @@
+1.
+SELECT DISTINCT LAST_NAME FROM EMPLOYEES;
+
+2.
+SELECT STREET_ADDRESS||','||CITY||',' || STATE_PROVINCE||',' || POSTAL_CODE  Location
+from LOCATIONS
+where STREET_ADDRESS is not NULL or  
+			CITY is not NULL or  
+			STATE_PROVINCE is not NULL or 
+			POSTAL_CODE is not NULL 
+ORDER BY POSTAL_CODE ASC;
+
+3.
+SELECT DEPARTMENT_ID , count(COMMISSION_PCT)
+from EMPLOYEES 
+where DEPARTMENT_ID is not NULL 
+GROUP BY DEPARTMENT_ID 
+having MIN(SALARY) >= 5000;
+
+4.
+SELECT LAST_NAME || ', ' || FIRST_NAME "full name" , 
+				SALARY * 12 * (1 + nvl(COMMISSION_PCT , 0 ) )  "Annual Salary" , 
+				SALARY * 12 * (1 + nvl(COMMISSION_PCT , 0 ) ) * 0.95 "Deduced Salary"
+from EMPLOYEES
+WHERE LAST_NAME LIKE 'S%' or 
+			LAST_NAME LIKE 's%' ;
+5.
+
+SELECT DEPARTMENT_ID  , JOB_ID , min(HIRE_DATE) "first hiring date" , MAX(HIRE_DATE) "last hiring date " , avg(nvl(SALARY , 0 )) "avg salary"
+from EMPLOYEES 
+where DEPARTMENT_ID is not null and 
+		JOB_ID is NOT null 
+GROUP BY DEPARTMENT_ID , JOB_ID
+having avg(nvl(SALARY , 0 )) > 6000
+ORDER BY DEPARTMENT_ID;
+
+6.
+SELECT  1 "HAS COMMISSION"  , count(*) count
+from EMPLOYEES
+WHERE COMMISSION_PCT is not NULL
+
+UNION 
+SELECT  0 "HAS COMMISSION" , count(*) count
+from EMPLOYEES
+WHERE COMMISSION_PCT is NULL;
+
+ORDER BY "HAS COMMISSION " DESC 
