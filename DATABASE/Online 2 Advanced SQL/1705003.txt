@@ -1,0 +1,42 @@
+1.
+SELECT l.CITY  , ( select count(  * ) from hr.DEPARTMENTS  d WHERE d.LOCATION_ID  = l.Location_id  )
+from hr.locations l
+ORDER BY l.CITY;
+2.
+SELECT  d1.department_id ,  avg(nvl(e1.salary, 0))
+from hr.departments d1 join hr.EMPLOYEES  e1 on ( d1.DEPARTMENT_ID = e1.DEPARTMENT_ID )
+group by d1.DEPARTMENT_ID , d1.DEPARTMENT_NAME
+having avg(nvl(e1.salary, 0)) >= all (
+					SELECT  avg(nvl(e.salary, 0))
+					from hr.departments d join hr.EMPLOYEES  e on ( d.DEPARTMENT_ID = e.DEPARTMENT_ID )
+					group by d.DEPARTMENT_ID )
+UNION 
+SELECT  d1.department_id ,  avg(nvl(e1.salary, 0))
+from hr.departments d1 join hr.EMPLOYEES  e1 on ( d1.DEPARTMENT_ID = e1.DEPARTMENT_ID )
+group by d1.DEPARTMENT_ID , d1.DEPARTMENT_NAME
+having avg(nvl(e1.salary, 0)) <= all (
+					SELECT  avg(nvl(e.salary, 0))
+					from hr.departments d join hr.EMPLOYEES  e on ( d.DEPARTMENT_ID = e.DEPARTMENT_ID )
+					group by d.DEPARTMENT_ID ) ;
+
+
+
+
+
+3.
+SELECT  nvl( to_char( e.Hire_date  , 'Month/dd/yyyy')  , '‘January/01/ 1900' ) , country_name
+from hr.DEPARTMENTS  d LEFT JOIN hr.EMPLOYEES  e on ( d.MANAGER_ID = e.EMPLOYEE_ID )  join hr.LOCATIONS using ( location_id)
+			join hr.countries using (country_id);
+
+
+4.
+SELECT DISTINCT d.DEPARTMENT_NAME
+from hr.DEPARTMENTS d 
+where EXISTS ( SELECT * from hr.EMPLOYEES e1 
+							where d.DEPARTMENT_ID = e1.DEPARTMENT_ID and 
+								e1.salary >  (SELECT e2.salary from hr.EMPLOYEES e2 
+														where e2.employee_id = e1.manager_id ) 
+								);
+
+
+
