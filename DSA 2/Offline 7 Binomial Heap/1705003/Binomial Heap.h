@@ -59,6 +59,14 @@ public :
         }
     }
 
+    ~BinomialTree()
+    {
+        
+        if(child)
+            delete child;
+        if(sibling)
+            delete sibling;
+    }
 };
 
 
@@ -193,6 +201,7 @@ public:
         {
             AddTree(last_head , carry_head);
         }
+        h.head=0;
 
     }
 
@@ -266,6 +275,9 @@ public:
             Union(h);
 
         }
+
+        ret_head->child = 0;
+
         return ret_head;
     }
 
@@ -283,6 +295,12 @@ public:
         cout<<"\n";
     }
 
+    ~BinomialHeap()
+    {
+        if(head)
+            delete head;
+        head = 0;
+    }
 };
 
 

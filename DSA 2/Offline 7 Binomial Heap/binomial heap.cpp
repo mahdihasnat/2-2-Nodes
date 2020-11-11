@@ -32,7 +32,9 @@ int main()
         }
         else if (cmd == 'E')
         {
-            cout<<"Extract-Min returned "<<h.ExtractMin()->data<<"\n";
+            BinomialTree<int > * mn = h.ExtractMin();
+            cout<<"Extract-Min returned "<<mn->data<<"\n";
+            delete mn;
         }
         else if(cmd == 'P')
         {

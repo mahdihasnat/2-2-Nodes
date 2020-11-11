@@ -1,11 +1,25 @@
-#ifndef BINOMIAL_HEAP_ADDED
-#define BINOMIAL_HEAP_ADDED
-#include<queue> // queue
-#include<iostream> // cout
-#include <utility>   // make_pair
+#include <bits/stdc++.h>
+#define ff first
+#define ss second
+#define pii pair < ll , ll  >
+#define psi pair < string , ll  >
+#define pb(a) push_back(a)
+#define mp(a,b) make_pair(a,b)
+#define input freopen("input.txt","r",stdin)
+#define output freopen("output.txt","w",stdout)
+#define fast_input ios_base::sync_with_stdio(false)
 
-#include<bits/stdc++.h>
+
 using namespace std;
+typedef long long ll;
+const ll  inf=1e16;
+/// code starts here
+
+
+
+#define DBG(a) cerr<< "line "<<__LINE__ <<" : "<< #a <<" --> "<<(a)<<endl
+#define NL cout<<endl
+
 
 template < class T >
 class BinomialTree
@@ -68,8 +82,6 @@ public :
             delete sibling;
     }
 };
-
-
 
 
 template<class T >
@@ -275,9 +287,6 @@ public:
             Union(h);
 
         }
-
-        ret_head->child = 0;
-
         return ret_head;
     }
 
@@ -304,4 +313,87 @@ public:
 };
 
 
-#endif // BINOMIAL_HEAP_ADDED
+vector < pii > path[100005];
+ll pre[100005];
+ll dis[100005];
+
+
+struct data
+{
+    ll v;
+    data(ll a)
+    {
+        v=a;
+    }
+    friend bool operator < (data a,data b)
+    {
+        return dis[a.v]<dis[b.v];
+    }
+};
+
+void Dijkstra(ll n)
+{
+    for(ll i=2; i<=n; i++)
+        dis[i]=inf;
+    BinomialHeap < data > q;
+    q.Insert((data)1);
+    dis[1]=0;
+    while(!q.Empty())
+    {
+        data aux=q.ExtractMin()->data;
+        //cout<<" q.top ()"<<aux.v<<endl;
+
+        if(aux.v==n)
+            return ;
+        //cout<<path[aux.v].size()<<endl;
+        for(ll i=0; i<path[aux.v].size(); i++)
+        {
+            //cout<<" l hs = "<<dis[path[aux.v][i].ff]<<" rhs "<< dis[aux.v] + path[aux.v][i].ss<<endl;
+            if(dis[path[aux.v][i].ff] > dis[aux.v] + path[aux.v][i].ss)
+            {
+                pre[path[aux.v][i].ff]=aux.v;
+                dis[path[aux.v][i].ff] = dis[aux.v] + path[aux.v][i].ss ;
+                q.Insert((data)path[aux.v][i].ff);
+            }
+        }
+    }
+    //cout<<" here ";
+    return ;
+}
+int main()
+{
+    fast_input;
+    //freopen("output.txt","w+",stdout);
+
+    ll n,m;
+    cin>>n>>m;
+    while(m--)
+    {
+        ll a,b,w;
+        cin>>a>>b>>w;
+        path[a].pb(mp(b,w));
+        path[b].pb(mp(a,w));
+    }
+    Dijkstra(n);
+    if(dis[n]==inf)
+        cout<<-1<<endl;
+    else
+    {
+        ll b=n;
+        ll a=1;
+        vector < ll  >ans;
+        do
+        {
+            ans.pb(b);
+            b=pre[b];
+        }
+        while (a!=b);
+        ans.pb(a);
+        reverse(ans.begin(),ans.end());
+
+        for(ll i=0; i<ans.size(); i++)
+        {
+            cout<<ans[i]<<" ";
+        }
+    }
+}
