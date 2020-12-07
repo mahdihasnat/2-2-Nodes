@@ -1,0 +1,88 @@
+
+#ifndef ADDED_HASH_DOUBLE
+#define ADDED_HASH_DOUBLE
+
+
+
+
+
+namespace HashDouble
+{
+
+template < class keyType, class valueType, class HashFuncType = hash<keyType>, class auxHashFuncType = hash<keyType> >
+class HashTable
+{
+private:
+    unsigned int tableSize ;
+    valueType * values;
+    keyType * keys;
+    bool * visited;
+    HashFuncType HashFunc;
+    auxHashFuncType auxHashFunc;
+public :
+
+    int total_collision= 0 ;
+    int total_prob = 0;
+
+    HashTable(int tableSize) : tableSize(tableSize)
+    {
+        values = new valueType [ tableSize ];
+        visited = new bool[tableSize];
+        for(int i=0; i<tableSize ; i++)
+            values[i] = 0, visited[i] = 0;
+    }
+    ~HashTable()
+    {
+        delete [] values ;
+    }
+
+    void Insert(const keyType & key,const valueType  & value)
+    {
+        int index = HashFunc(key) % tableSize;
+        int offset =max(auxHashFunc(key) % tableSize, 1U);
+
+//        DBG(index);
+//        DBG(offset);
+
+        if(keys[index] == 0)
+        {
+            total_prob++;
+
+        }
+        else
+        {
+            total_collision++;
+            total_prob++;
+            index = (index + offset) % tableSize;
+
+            while(keys[index])
+            {
+                total_prob++;
+                index = (index + offset) % tableSize;
+            }
+        }
+
+        visited[index] = 1;
+        keys[index] = key;
+
+
+    }
+
+    bool Search(const keyType & key )
+    {
+        int index = HashFunc(key) % tableSize;
+        int offset =max(auxHashFunc(key) % tableSize, 1U);
+
+        return 1;
+
+    }
+    void Delete(const keyType & key)
+    {
+
+    }
+};
+
+}
+
+
+#endif // ADDED_HASH_DOUBLE
